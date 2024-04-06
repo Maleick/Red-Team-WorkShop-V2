@@ -1,0 +1,5 @@
+Download and Install according to your OS: (Windows Preferred)
+https://github.com/BloodHoundAD/BloodHound/releases/tag/v4.3.1
+
+Neo4J Setup (Windows)
+https://neo4j.com/deployment-center/#desktop

